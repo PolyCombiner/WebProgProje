@@ -2,12 +2,11 @@
 
 namespace FitnessCenterApp.Models
 {
-    [cite_start]// Randevu detaylarını saklayan sınıf [cite: 20]
     public class Appointment
     {
         public int Id { get; set; }
 
-        // Randevuyu alan üyenin ID'si (IdentityUser kullanacağız ileride)
+        // Randevuyu alan üyenin ID'si
         public string UserId { get; set; }
 
         [Required]
@@ -15,11 +14,11 @@ namespace FitnessCenterApp.Models
         public DateTime AppointmentDate { get; set; }
 
         public int TrainerId { get; set; }
-        public Trainer Trainer { get; set; } // Hangi hoca?
+        public Trainer Trainer { get; set; }
 
         public int ServiceId { get; set; }
-        public Service Service { get; set; } // Hangi ders?
+        public Service Service { get; set; }
 
-        public bool IsConfirmed { get; set; } = false; // Onay durumu [cite: 21]
+        public bool IsConfirmed { get; set; } = false;
     }
 }
