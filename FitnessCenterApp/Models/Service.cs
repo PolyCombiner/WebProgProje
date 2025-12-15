@@ -17,6 +17,6 @@ namespace FitnessCenterApp.Models
         public decimal Price { get; set; }
 
         // Bu hizmeti veren antrenörlerin listesi
-        public ICollection<Trainer> Trainers { get; set; }
+        public ICollection<Trainer>? Trainers { get; set; }
     }
 }

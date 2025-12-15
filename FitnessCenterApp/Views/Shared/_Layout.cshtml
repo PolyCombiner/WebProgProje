@@ -24,8 +24,17 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            @using FitnessCenterApp.Constants
+
+                            @if (User.IsInRole(Roles.Admin))
+                            {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Services" asp-action="Index">Hizmet Yönetimi</a>
+                            </li>
+                            }
                         </li>
                     </ul>
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>

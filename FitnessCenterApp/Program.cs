@@ -1,6 +1,7 @@
 using FitnessCenterApp.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,13 +11,27 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // 2. Kimlik (Identity) Ayarý
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+// 2. Kimlik (Identity) Ayarý
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 3;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI(); // <-- BU SATIRI EKLE
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+var cultureInfo = new CultureInfo("en-US"); // Amerikan formatýný (Nokta) baz al
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 if (!app.Environment.IsDevelopment())
 {
@@ -35,5 +50,23 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
 
+// --- SEEDING ÝÞLEMÝ (Admin ve Rol Ekleme) ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Seeder sýnýfýný çalýþtýr
+        await FitnessCenterApp.Data.DbSeeder.SeedRolesAndAdminAsync(services);
+    }
+    catch (Exception ex)
+    {
+        // Olasý bir hatada konsola yaz
+        Console.WriteLine("Seed iþlemi sýrasýnda hata: " + ex.Message);
+    }
+}
+// -------------------------------------------
+ // Bu satýr zaten vardý, silme.
 app.Run();

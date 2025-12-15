@@ -18,21 +18,26 @@ namespace FitnessCenterApp.Data
         // HATA ÇÖZÜMÜ BURADA:
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder); // Identity ayarları için zorunlu
+            base.OnModelCreating(builder);
 
-            // Randevu - Eğitmen ilişkisinde zincirleme silmeyi kapatıyoruz
+            // 1. Randevu İlişkileri (Bunlar zaten vardı, silinmesin)
             builder.Entity<Appointment>()
                 .HasOne(a => a.Trainer)
                 .WithMany()
                 .HasForeignKey(a => a.TrainerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Randevu - Hizmet ilişkisinde zincirleme silmeyi kapatıyoruz
             builder.Entity<Appointment>()
                 .HasOne(a => a.Service)
-                .WithMany() // Service sınıfında Trainers listesi var ama Appointment listesi yoksa WithMany() boş kalabilir
+                .WithMany() // Service içinde Trainers listesi var
                 .HasForeignKey(a => a.ServiceId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // 2. YENİ EKLENEN KISIM: Ücret (Price) Ayarı
+            // SQL'e diyoruz ki: Bu sayı toplam 18 basamaklı, virgülden sonra 2 basamak olsun.
+            builder.Entity<Service>()
+                .Property(s => s.Price)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }
