@@ -11,11 +11,13 @@ namespace FitnessCenterApp.Models
         public string FullName { get; set; }
 
         [Display(Name = "Uzmanlık Alanı")]
-        public string Specialization { get; set; }
+        public string? Specialization { get; set; } // Soru işareti eklendi
 
         public int ServiceId { get; set; }
-        public Service Service { get; set; }
 
-        public string Availability { get; set; }
+        // ÖNEMLİ OLAN BURASI:
+        public Service? Service { get; set; } // Soru işareti eklendi
+
+        public string? Availability { get; set; } // Soru işareti eklendi
     }
 }
