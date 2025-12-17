@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "AI Antrenör";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3>🤖 Yapay Zeka Destekli Program Oluşturucu</h3>
+                </div>
+                <div class="card-body">
+                    <p>Fiziksel özelliklerinizi girin, Yapay Zeka size en uygun rotayı çizsin.</p>
+
+                    <form asp-action="GeneratePlan" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Kilonuz (kg)</label>
+                                <input type="number" name="weight" class="form-control" required placeholder="Örn: 70">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Boyunuz (cm)</label>
+                                <input type="number" name="height" class="form-control" required placeholder="Örn: 175">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Hedefiniz Nedir?</label>
+                            <select name="goal" class="form-select">
+                                <option value="zayiflama">Kilo Vermek / Yağ Yakmak</option>
+                                <option value="kas">Kas Yapmak / Hacim Kazanmak</option>
+                                <option value="form">Sağlıklı Yaşam / Form Koruma</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Analiz Et ve Program Oluştur</button>
+                    </form>
+
+                    @if (ViewBag.ShowResult == true)
+                    {
+                        <hr class="my-4">
+                        <div class="alert alert-info">
+                            <h4 class="alert-heading">Sonuçlar Hazır! 🎉</h4>
+                            <p><strong>Analiz:</strong> @ViewBag.Advice</p>
+                            <hr>
+                            <p class="mb-0"><strong>🚀 Size Özel Plan:</strong> @ViewBag.Plan</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

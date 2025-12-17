@@ -25,7 +25,10 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 .AddDefaultTokenProviders()
 .AddDefaultUI(); // <-- BU SATIRI EKLE
 
-builder.Services.AddControllersWithViews();
+// JSON Döngü Hatasýný Çözen Kod
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
