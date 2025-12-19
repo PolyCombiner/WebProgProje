@@ -9,40 +9,43 @@ using FitnessCenterApp.Data;
 using FitnessCenterApp.Models;
 using System.Security.Claims;
 using FitnessCenterApp.Constants;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FitnessCenterApp.Controllers
 {
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AppointmentsController(ApplicationDbContext context)
+        public AppointmentsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Appointments
         // GET: Appointments
         public async Task<IActionResult> Index()
         {
-            // Önce veritabanındaki tüm randevuları (Hocası ve Dersi ile birlikte) hazırlıyoruz
-            var fitnessContext = _context.Appointments
+            var currentUserId = _userManager.GetUserId(User);
+            var isAdmin = User.IsInRole("Admin");
+
+            // LINQ Sorgusu: Admin ise hepsi, Üye ise sadece kendine ait olanlar
+            
+            var query = _context.Appointments
                 .Include(a => a.Service)
-                .Include(a => a.Trainer);
+                .Include(a => a.Trainer)
+                .AsQueryable();
 
-            // Eğer giren kişi ADMIN ise: Hepsini görsün
-            if (User.IsInRole(Roles.Admin))
+            if (!isAdmin)
             {
-                return View(await fitnessContext.ToListAsync());
+                query = query.Where(a => a.UserId == currentUserId);
             }
-            else
-            {
-                // Eğer giren kişi normal ÜYE ise: Sadece kendi ID'si olanları görsün
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var myAppointments = fitnessContext.Where(a => a.UserId == currentUserId);
 
-                return View(await myAppointments.ToListAsync());
-            }
+            return View(await query.ToListAsync());
         }
 
         // GET: Appointments/Details/5
@@ -78,29 +81,39 @@ namespace FitnessCenterApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AppointmentDate,TrainerId,ServiceId")] Appointment appointment)
+        public async Task<IActionResult> Create([Bind("Id,AppointmentDate,TrainerId,ServiceId,IsConfirmed")] Appointment appointment)
         {
-            // 1. Giriş yapmış kullanıcının ID'sini otomatik al
-            appointment.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // 2. UserId formdan gelmediği için hata verir, o hatayı siliyoruz
-            // Çünkü biz yukarıda elle atadık.
-            ModelState.Remove("UserId");
-
-            // 3. Trainer ve Service nesneleri boş gelebilir (Validasyon hatasını temizle)
-            ModelState.Remove("Trainer");
-            ModelState.Remove("Service");
-
             if (ModelState.IsValid)
             {
+                // 1. Seçilen hizmetin süresini öğrenelim
+                var service = await _context.Services.FindAsync(appointment.ServiceId);
+                if (service == null) return NotFound();
+
+                var newStart = appointment.AppointmentDate;
+                var newEnd = newStart.AddMinutes(service.Duration);
+
+                // 2. Antrenörün o saatlerde başka randevusu var mı kontrol edelim (LINQ Sorgusu)
+                
+                var isBusy = await _context.Appointments
+                    .AnyAsync(a => a.TrainerId == appointment.TrainerId &&
+                                   a.AppointmentDate < newEnd &&
+                                   newStart < a.AppointmentDate.AddMinutes(a.Service.Duration));
+
+                if (isBusy)
+                {
+                    ModelState.AddModelError("", "Seçilen antrenör bu saat aralığında başka bir randevusu olduğu için müsait değildir.");
+                    ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", appointment.ServiceId);
+                    ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", appointment.TrainerId);
+                    return View(appointment);
+                }
+
+                // Kullanıcı ID'sini ata
+                appointment.UserId = _userManager.GetUserId(User);
+
                 _context.Add(appointment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
-            // Hata olursa listeleri tekrar doldur
-            ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", appointment.ServiceId);
-            ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", appointment.TrainerId);
             return View(appointment);
         }
 
