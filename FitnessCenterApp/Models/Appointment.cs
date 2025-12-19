@@ -6,18 +6,20 @@ namespace FitnessCenterApp.Models
     {
         public int Id { get; set; }
 
-        // Randevuyu alan üyenin ID'si
-        public string UserId { get; set; }
+        public string? UserId { get; set; } // Nullable olmalı
 
-        [Required]
+        [Required(ErrorMessage = "Lütfen bir tarih seçiniz.")]
         [Display(Name = "Randevu Tarihi ve Saati")]
         public DateTime AppointmentDate { get; set; }
 
         public int TrainerId { get; set; }
-        public Trainer Trainer { get; set; }
+
+        // KRİTİK NOKTA: Bunların yanına ? eklemeliyiz 
+        // Yoksa sistem bunları formdan "zorunlu" bekler ve hata verir.
+        public virtual Trainer? Trainer { get; set; }
 
         public int ServiceId { get; set; }
-        public Service Service { get; set; }
+        public virtual Service? Service { get; set; }
 
         public bool IsConfirmed { get; set; } = false;
     }
