@@ -6,7 +6,6 @@ Bu proje, Sakarya Üniversitesi Web Programlama dersi için geliştirilmiş bir 
 - **Admin Paneli:** Hizmet ve Antrenör (Eğitmen) yönetimi (CRUD).
 - **Üye Sistemi:** Kullanıcı kayıt, giriş ve rol bazlı yetkilendirme.
 - **Randevu Sistemi:** Üyelerin müsaitliğe göre antrenörlerden ders alabilmesi.
-- **Yapay Zeka (AI):** Vücut kitle indeksine göre antrenman önerisi sunan modül.
 - **REST API:** Antrenör verilerini dışarıya sunan JSON servisi.
 - **Modern Arayüz:** Bootstrap 5 (Lux Teması) ve Glassmorphism tasarımı.
 
@@ -20,4 +19,5 @@ Bu proje, Sakarya Üniversitesi Web Programlama dersi için geliştirilmiş bir 
 ## Geliştiriciler
 - Ad Soyad: Hasan Hüseyin Gezer
 - Numara: B211210062
+
 
